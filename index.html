@@ -443,6 +443,51 @@ tbody td:nth-child(2),tbody td:nth-child(4){white-space:nowrap}
   .grid-2{grid-template-columns:1fr 1fr!important}
   .kpi:hover{transform:none}
 }
+#printArea{display:none}
+@media print{
+  body.print-person .app{display:none!important}
+  body.print-person #printArea{display:block!important}
+  @page{size:A4 portrait;margin:14mm}
+}
+.pr-person{font-family:"Figtree",Arial,sans-serif;color:#0E1C33;font-size:11.5px;line-height:1.4;break-after:page;page-break-after:always}
+.pr-person:last-child{break-after:auto;page-break-after:auto}
+.pr-h{display:flex;align-items:center;gap:14px;border-bottom:2px solid #0A2A5E;padding-bottom:10px;margin-bottom:12px}
+.pr-logo{background:#0A2A5E;border-radius:8px;padding:8px 10px}
+.pr-logo img{display:block;width:120px;height:auto}
+.pr-h h2{margin:0;font-size:16px;color:#0A2A5E}
+.pr-h p{margin:2px 0 0;color:#5A6A82;font-size:10.5px}
+.pr-id{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.pr-id h3{margin:0;font-size:18px}
+.pr-id p{margin:2px 0 0;color:#5A6A82}
+.pr-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.pr-facts div{background:#F3F6FB;border-radius:6px;padding:6px 8px}
+.pr-facts span{display:block;font-size:9.5px;color:#8C9AB0;font-weight:600}
+.pr-facts b{font-size:12px}
+.pr-t{font-size:12.5px;color:#0A2A5E;margin:14px 0 6px;border-left:3px solid #1668E3;padding-left:7px}
+.pr-tbl{width:100%;border-collapse:collapse;min-width:0;font-size:11px;break-inside:avoid}
+.pr-tbl th{background:#E8F1FF;color:#0A2A5E;text-align:left;padding:5px 7px;font-weight:700;border:1px solid #D5DEEA;position:static}
+.pr-tbl td{padding:5px 7px;border:1px solid #D5DEEA}
+.pr-tbl .c{text-align:center}
+.pr-tbl td.lo{background:#FDEBEC;color:#D93F45;font-weight:700}
+.pr-tbl td.md{background:#FFF4DC;color:#B57205;font-weight:700}
+.pr-tbl tr.tot td{font-weight:800;background:#F3F6FB}
+.tg{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;background:#EFF2F7;color:#5A6A82}
+.tg.g{background:#E6F6EE;color:#15935B}.tg.a{background:#FFF4DC;color:#B57205}.tg.r{background:#FDEBEC;color:#D93F45}.tg.b{background:#E8F1FF;color:#1668E3}
+.tg.big{font-size:12px;padding:4px 12px}
+.pw{border:1px solid #E3E9F2;border-radius:6px;padding:7px 9px;margin-bottom:6px;break-inside:avoid}
+.pw h4{margin:0 0 4px;font-size:11.5px;display:flex;align-items:center;gap:8px}
+.pw dl{margin:0;display:grid;grid-template-columns:170px 1fr;gap:3px 10px}
+.pw dt{font-weight:700;color:#5A6A82;font-size:10.5px}
+.pw dd{margin:0}
+.mut{color:#8C9AB0}
+.pr-sign{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:38px;break-inside:avoid}
+.pr-sign div{text-align:center;color:#5A6A82;font-size:10.5px}
+.pr-sign i{display:block;border-top:1px solid #0E1C33;margin-bottom:4px}
+.keep{break-inside:avoid;page-break-inside:avoid}
+.pw.pend{padding:5px 9px}
+.pw.pend h4{margin:0}
+.pr-tbl tr,.pr-tbl tr:hover{background:none}
+.pr-tbl tr.tot td{background:#F3F6FB}
 </style>
 </head>
 <body>
@@ -527,7 +572,7 @@ tbody td:nth-child(2),tbody td:nth-child(4){white-space:nowrap}
         <span class="muted" id="repSub"></span>
         <div class="right no-print">
           <button class="btn sm" id="btnCsv"><svg class="i"><use href="#i-download"/></svg>Descargar Excel</button>
-          <button class="btn sm primary" id="btnPdf"><svg class="i"><use href="#i-download"/></svg>Descargar PDF</button>
+          <button class="btn sm primary" id="btnPdf" title="Un reporte por colaborador, cada uno en su propia página"><svg class="i"><use href="#i-download"/></svg>Reportes individuales (PDF)</button>
         </div>
       </div>
       <div class="print-only print-title"><b>Seguimiento Post-CAPA · Blue Medical</b><span id="printMeta"></span></div>
@@ -560,6 +605,7 @@ tbody td:nth-child(2),tbody td:nth-child(4){white-space:nowrap}
   </main>
 </div>
 
+<div id="printArea" aria-hidden="true"></div>
 <div class="scrim" id="scrim"></div>
 <aside class="panel" id="panel" aria-label="Ficha del colaborador" aria-hidden="true">
   <div class="panel-scroll" id="panelBody"></div>
@@ -696,7 +742,7 @@ function renderTable(list){
 function renderRoster(){
   const list=filtered();$("#rosterCount").textContent=`${list.length} colaboradores`;
   $("#roster").innerHTML=list.length?list.map(c=>{const e=estado(c),i=nextIdx(c),p=prog(c);
-    return `<div class="card rc"><div class="rc-top">${avatar(c)}<div><b>${esc(c.nombre)}</b><small>${esc(c.puesto)}</small></div></div><dl><dt>Sede</dt><dd>${esc(c.sede)}</dd><dt>Jefe</dt><dd>${esc(c.jefe)}</dd><dt>Grupo</dt><dd>${esc(c.grupo)}</dd><dt>Fin CAPA</dt><dd>${fmt(c.finCapa)}</dd><dt>Próximo</dt><dd>${p===NSEG?"Cerrado":`S${i+1} · ${fmt(due(c,i))}`}</dd></dl><div class="rc-f"><span class="pill ${ESTADOS[e].pill}">${ESTADOS[e].label}</span><button class="btn sm" data-open="${esc(c.id)}">Ver ficha</button></div></div>`;}).join(""):`<div class="card empty"><b>No hay colaboradores para mostrar</b>Revisa los filtros o la búsqueda.</div>`;
+    return `<div class="card rc"><div class="rc-top">${avatar(c)}<div><b>${esc(c.nombre)}</b><small>${esc(c.puesto)}</small></div></div><dl><dt>Sede</dt><dd>${esc(c.sede)}</dd><dt>Jefe</dt><dd>${esc(c.jefe)}</dd><dt>Grupo</dt><dd>${esc(c.grupo)}</dd><dt>Fin CAPA</dt><dd>${fmt(c.finCapa)}</dd><dt>Próximo</dt><dd>${p===NSEG?"Cerrado":`S${i+1} · ${fmt(due(c,i))}`}</dd></dl><div class="rc-f"><span class="pill ${ESTADOS[e].pill}">${ESTADOS[e].label}</span><button class="btn sm ghost" data-pdf="${esc(c.id)}" title="Descargar reporte en PDF">${ico("download")}PDF</button><button class="btn sm" data-open="${esc(c.id)}">Ver ficha</button></div></div>`;}).join(""):`<div class="card empty"><b>No hay colaboradores para mostrar</b>Revisa los filtros o la búsqueda.</div>`;
 }
 function renderReports(){
   const all=D.colaboradores;
@@ -736,6 +782,7 @@ function timeline(c){
 function renderPanel(){
   const c=getSel();if(!c){closePanel();return;}const e=estado(c);
   $("#panelBody").innerHTML=`<div class="ph">${avatar(c,true)}<div style="min-width:0"><h3>${esc(c.nombre)}</h3><div class="meta">${esc(c.puesto)}</div><div class="estado-row"><span class="pill ${ESTADOS[e].pill}">${ESTADOS[e].label}</span><span class="ro-tag">${ico("lock","lk")}Solo consulta</span></div></div><button class="x" aria-label="Cerrar ficha">${ico("x")}</button></div>
+    <button class="btn sm primary" id="btnPersonPdf" style="width:100%;justify-content:center;margin-top:14px">${ico("download")}Descargar reporte de ${esc(c.nombre.split(" ")[0])} (PDF)</button>
     <dl class="facts"><div><dt>Sede</dt><dd>${esc(c.sede)}</dd></div><div><dt>Jefe directo</dt><dd>${esc(c.jefe)}</dd></div><div><dt>Fecha de ingreso</dt><dd>${fmt(c.ingreso)}</dd></div><div><dt>Fin de CAPA</dt><dd>${fmt(c.finCapa)}</dd></div>${c.formador?`<div><dt>Formador(a)</dt><dd>${esc(c.formador)}</dd></div>`:""}<div><dt>Grupo</dt><dd>${esc(c.grupo)}</dd></div>
     <div style="grid-column:1/-1"><dt>Avance del seguimiento</dt><dd class="prog" style="margin:4px 0 0;color:var(--ink)"><span class="bar"><i style="width:${prog(c)/NSEG*100}%"></i></span>${prog(c)}/${NSEG}</dd></div></dl>
     ${timeline(c)}
@@ -790,7 +837,49 @@ $("#panel").addEventListener("click",e=>{
 });
 
 /* ============ descargas ============ */
-$("#btnPdf").onclick=()=>{if(ui.sel)closePanel();setView("reportes");setTimeout(()=>window.print(),350);};
+function personReport(c){
+  const e=estado(c),p=prog(c);const g=new Date();
+  const res={ok:"Realizado",ref:"Requiere refuerzo",att:"Requiere atención",late:"Atrasado",pend:"Pendiente"};
+  const resCls={ok:"g",ref:"a",att:"r",late:"r",pend:"x"};
+  const doneIdx=IDX.filter(i=>done(c.semanas[i]));
+  const allSc=[];doneIdx.forEach(i=>D.criterios.forEach(cr=>{const v=c.semanas[i].scores[cr.id];if(v)allSc.push(v);}));
+  const gen=allSc.length?(allSc.reduce((a,b)=>a+b,0)/allSc.length).toFixed(1):"—";
+  let TA=0,TN=0,TD=0;c.semanas.forEach(s=>{TA+=s.aseg||0;TN+=s.noaseg||0;TD+=s.adic||0;});
+  const scoreRows=D.criterios.map(cr=>`<tr><td>${esc(cr.nombre)}</td>${IDX.map(i=>{const s=c.semanas[i];const v=done(s)?s.scores[cr.id]:null;return `<td class="c ${v&&v<=2?"lo":v===3?"md":""}">${v||"—"}</td>`;}).join("")}</tr>`).join("");
+  const avgRow=`<tr class="tot"><td>Promedio</td>${IDX.map(i=>{const s=c.semanas[i];const a=done(s)?avgS(s):null;return `<td class="c">${a?a.avg.toFixed(1):"—"}</td>`;}).join("")}</tr>`;
+  const resRow=`<tr><td>Resultado</td>${IDX.map(i=>{const st=cell(c,i);return `<td class="c"><span class="tg ${resCls[st]}">${res[st]}</span></td>`;}).join("")}</tr>`;
+  const dateRow=`<tr><td>Fecha</td>${IDX.map(i=>`<td class="c">${fmt(segFecha(c,i))}</td>`).join("")}</tr>`;
+  const weeks=IDX.map(i=>{const s=c.semanas[i];if(!done(s))return `<div class="pw pend"><h4>Semana ${i+1} · ${fmt(due(c,i))} <span class="mut" style="font-weight:500">${isLate(c,i)?"— Atrasado: no se ha registrado.":"— Pendiente."}</span></h4></div>`;
+    const t=[...s.temas,...(s.otroTema?[s.otroTema]:[])];
+    return `<div class="pw"><h4>Semana ${i+1} · ${fmt(segFecha(c,i))} <span class="tg ${resCls[cell(c,i)]}">${res[cell(c,i)]}</span></h4>
+      <dl><dt>① Observaciones</dt><dd>${s.obs?esc(s.obs):'<span class="mut">Sin observaciones.</span>'}</dd>
+      <dt>② Aspectos que requieren refuerzo</dt><dd>${t.length?esc(t.join(", ")):'<span class="mut">No requiere refuerzo.</span>'}${s.detalle?` — ${esc(s.detalle)}`:""}</dd>
+      <dt>③ Plan de acción</dt><dd>${s.accion?esc(s.accion):'<span class="mut">Sin acción registrada.</span>'}${s.responsable?` <span class="mut">(Responsable: ${esc(s.responsable)})</span>`:""}</dd></dl></div>`;}).join("");
+  const vRows=IDX.map(i=>{const s=c.semanas[i];const h=hasSales(s);return `<tr><td>Semana ${i+1}</td><td class="c">${h&&s.aseg!=null?s.aseg:"—"}</td><td class="c">${h&&s.noaseg!=null?s.noaseg:"—"}</td><td class="c"><b>${h?vTot(s):"—"}</b></td><td class="c">${h&&s.adic!=null?s.adic:"—"}</td><td>${h&&s.comentarios?esc(s.comentarios):""}</td></tr>`;}).join("");
+  return `<section class="pr-person">
+    <header class="pr-h"><div class="pr-logo"><img src="${document.querySelector(".brand-logo").src}" alt="Blue Medical"></div><div><h2>Reporte individual · Seguimiento Post-CAPA</h2><p>Generado el ${g.toLocaleDateString("es-GT")} · ${esc($("#updPill span").textContent)}</p></div></header>
+    <div class="pr-id"><div><h3>${esc(c.nombre)}</h3><p>${esc(c.puesto)} · ${esc(c.sede)}</p></div><span class="tg big ${({seg:"b",ok:"g",ref:"a",att:"r"})[e]}">${ESTADOS[e].label}</span></div>
+    <div class="pr-facts"><div><span>Jefe directo</span><b>${esc(c.jefe)||"—"}</b></div><div><span>Formador(a)</span><b>${esc(c.formador)||"—"}</b></div><div><span>Fecha de ingreso</span><b>${fmt(c.ingreso)}</b></div><div><span>Fin de CAPA</span><b>${fmt(c.finCapa)}</b></div><div><span>Avance</span><b>${p}/${NSEG} seguimientos</b></div><div><span>Promedio general</span><b>${gen}</b></div><div><span>Total de ventas</span><b>${TA+TN}</b></div><div><span>Adicionales</span><b>${TD}</b></div></div>
+    <h3 class="pr-t">Evaluación semanal (escala 1 a 5)</h3>
+    <table class="pr-tbl"><thead><tr><th>Criterio</th>${IDX.map(i=>`<th class="c">Semana ${i+1}</th>`).join("")}</tr></thead><tbody>${dateRow}${scoreRows}${avgRow}${resRow}</tbody></table>
+    <h3 class="pr-t">Observaciones y plan de acción</h3>${weeks}
+    <div class="keep"><h3 class="pr-t">Ventas semanales (cantidad)</h3>
+    <table class="pr-tbl"><thead><tr><th>Semana</th><th class="c">Asegurado</th><th class="c">No asegurado</th><th class="c">Total</th><th class="c">Adicionales</th><th>Comentarios</th></tr></thead><tbody>${vRows}<tr class="tot"><td>Total</td><td class="c">${TA}</td><td class="c">${TN}</td><td class="c">${TA+TN}</td><td class="c">${TD}</td><td></td></tr></tbody></table></div>
+    <div class="pr-sign"><div><i></i>Formador(a)</div><div><i></i>Jefe inmediato</div><div><i></i>Colaborador(a)</div></div>
+  </section>`;
+}
+function printPeople(list){
+  if(!list.length)return;
+  $("#printArea").innerHTML=list.map(personReport).join("");
+  const old=document.title;document.title=list.length===1?`Reporte ${list[0].nombre}`:`Reportes individuales Post-CAPA`;
+  document.body.classList.add("print-person");
+  const done_=()=>{document.body.classList.remove("print-person");$("#printArea").innerHTML="";document.title=old;window.removeEventListener("afterprint",done_);};
+  window.addEventListener("afterprint",done_);
+  setTimeout(()=>window.print(),300);
+}
+$("#btnPdf").onclick=()=>printPeople(filtered());
+document.addEventListener("click",e=>{const b=e.target.closest("[data-pdf]");if(b){const c=D.colaboradores.find(x=>x.id===b.dataset.pdf);if(c)printPeople([c]);}
+  if(e.target.closest("#btnPersonPdf")){const c=getSel();if(c)printPeople([c]);}});
 $("#btnCsv").onclick=()=>{
   const res={ok:"Realizado",ref:"Requiere refuerzo",att:"Requiere atención",late:"Atrasado",pend:"Pendiente"};
   const head=["Grupo de ingreso","Colaborador","Puesto","Sede","Jefe directo","Formador(a)","Fecha de ingreso","Fin de CAPA","Estado","Avance"];
